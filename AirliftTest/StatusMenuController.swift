@@ -46,11 +46,13 @@ class StatusMenuController: NSObject {
         let optShift4Shortcut = MASShortcut.init(keyCode: UInt(kVK_ANSI_4), modifierFlags: UInt(NSEventModifierFlags.option.rawValue + NSEventModifierFlags.shift.rawValue))
         
         MASShortcutMonitor.shared().register(optShift4Shortcut, withAction: {
-            Process.launchedProcess(launchPath: "/usr/sbin/screencapture", arguments:["-i", "/tmp/screenshot.png"]).waitUntilExit()
-            let fileString = "file:///tmp/screenshot.png"
-            let fileURL = URL(string: fileString)!
+            let tempDir = NSTemporaryDirectory()
+            let fileName = "Screenshot.png"
+            let tempFileUrl = NSURL.fileURL(withPathComponents: [tempDir, fileName])!
+            let tempFilePath:String = tempFileUrl.path
+            Process.launchedProcess(launchPath: "/usr/sbin/screencapture", arguments:["-i", tempFilePath]).waitUntilExit()
             if defaults.string(forKey: "Server") != nil {
-                self.uploadAndCopyToPasteboard(fileURL: fileURL)
+                self.uploadAndCopyToPasteboard(fileURL: tempFileUrl)
             } else {
                 self.configAlert()
             }
